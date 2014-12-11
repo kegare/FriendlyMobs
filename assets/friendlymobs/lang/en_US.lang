@@ -1,0 +1,11 @@
+# Localization file : en_US
+
+friendlymobs.version.message=A new %s version is available
+
+friendlymobs.config.title=FriendlyMobs Configuration
+friendlymobs.config.general.versionNotify=Version Notify
+friendlymobs.config.general.versionNotify.tooltip=Whether or not to notify when a new FriendlyMobs version is available.
+friendlymobs.config.general.friendlyMobs=Friendly Mobs
+friendlymobs.config.general.friendlyMobs.tooltip=Specify the friendly mobs
+friendlymobs.config.select.mob=Select the mobs
+friendlymobs.config.select.mob.selected=%d mobs selected
