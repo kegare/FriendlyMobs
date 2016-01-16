@@ -9,6 +9,15 @@
 
 package com.kegare.friendlymobs.handler;
 
+import com.kegare.friendlymobs.api.FriendlyMobsAPI;
+import com.kegare.friendlymobs.api.event.GuiSelectedEvent.OnMobSelectedEvent;
+import com.kegare.friendlymobs.client.gui.GuiSelectMob;
+import com.kegare.friendlymobs.core.Config;
+import com.kegare.friendlymobs.core.FriendlyMobs;
+import com.kegare.friendlymobs.network.MobsSelectedMessage;
+import com.kegare.friendlymobs.util.Version;
+import com.kegare.friendlymobs.util.Version.Status;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
@@ -18,8 +27,10 @@ import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.event.entity.living.EnderTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
+import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -30,15 +41,6 @@ import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientDisconnection
 import net.minecraftforge.fml.common.network.FMLNetworkEvent.ServerConnectionFromClientEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-
-import com.kegare.friendlymobs.api.FriendlyMobsAPI;
-import com.kegare.friendlymobs.api.event.GuiSelectedEvent.OnMobSelectedEvent;
-import com.kegare.friendlymobs.client.gui.GuiSelectMob;
-import com.kegare.friendlymobs.core.Config;
-import com.kegare.friendlymobs.core.FriendlyMobs;
-import com.kegare.friendlymobs.network.MobsSelectedMessage;
-import com.kegare.friendlymobs.util.Version;
-import com.kegare.friendlymobs.util.Version.Status;
 
 public class FriendlyEventHooks
 {
@@ -150,6 +152,24 @@ public class FriendlyEventHooks
 		Entity entity = event.source.getSourceOfDamage();
 
 		if (entity != null && !entity.worldObj.isRemote && FriendlyMobsAPI.isFriendly(entity))
+		{
+			event.setCanceled(true);
+		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public void onEnderTeleport(EnderTeleportEvent event)
+	{
+		if (FriendlyMobsAPI.isFriendly(event.entityLiving))
+		{
+			event.setCanceled(true);
+		}
+	}
+
+	@SubscribeEvent(priority = EventPriority.HIGHEST)
+	public void onExplosion(ExplosionEvent.Start event)
+	{
+		if (event.explosion != null && FriendlyMobsAPI.isFriendly(event.explosion.getExplosivePlacedBy()))
 		{
 			event.setCanceled(true);
 		}

@@ -78,7 +78,6 @@ public class Config implements IMessage, IMessageHandler<Config, IMessage>
 		prop = config.get(category, "friendlyMobs", new String[0]);
 		prop.setLanguageKey(FriendlyMobs.CONFIG_LANG + category + "." + prop.getName()).setConfigEntryClass(selectMobEntry);
 		prop.comment = StatCollector.translateToLocal(prop.getLanguageKey() + ".tooltip");
-		prop.comment += " [default: " + prop.getDefault() + "]";
 		propOrder.add(prop.getName());
 		friendlyMobs = prop.getStringList();
 

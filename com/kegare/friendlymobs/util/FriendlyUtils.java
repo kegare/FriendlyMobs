@@ -11,7 +11,7 @@ package com.kegare.friendlymobs.util;
 
 import java.util.concurrent.ForkJoinPool;
 
-import net.minecraft.client.resources.I18n;
+import net.minecraft.util.StatCollector;
 import net.minecraftforge.fml.common.DummyModContainer;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.ModContainer;
@@ -52,7 +52,7 @@ public class FriendlyUtils
 	public static String getEntityLocalizedName(String name)
 	{
 		String key = "entity." + name + ".name";
-		String localized = I18n.format(key);
+		String localized = StatCollector.translateToLocal(key);
 
 		if (key.equals(localized))
 		{

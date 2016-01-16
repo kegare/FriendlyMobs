@@ -6,6 +6,6 @@ friendlymobs.config.title=FriendlyMobsの設定
 friendlymobs.config.general.versionNotify=バージョン通知
 friendlymobs.config.general.versionNotify.tooltip=FriendlyMobsの新しいバージョンが利用可能な場合、チャットログで通知します。
 friendlymobs.config.general.friendlyMobs=友好的なモブ
-friendlymobs.config.general.friendlyMobs.tooltip=友好的なモブを指定します
+friendlymobs.config.general.friendlyMobs.tooltip=友好的なモブを指定します。
 friendlymobs.config.select.mob=モブを選択してください
 friendlymobs.config.select.mob.selected=%dつのモブが選択済み

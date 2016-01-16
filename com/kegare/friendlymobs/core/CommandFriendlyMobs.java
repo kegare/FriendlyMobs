@@ -14,6 +14,9 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
+import com.kegare.friendlymobs.network.SelectMobMessage;
+import com.kegare.friendlymobs.util.Version;
+
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
@@ -26,19 +29,16 @@ import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 import net.minecraftforge.fml.common.Loader;
 
-import com.kegare.friendlymobs.network.SelectMobMessage;
-import com.kegare.friendlymobs.util.Version;
-
 public class CommandFriendlyMobs implements ICommand
 {
 	@Override
-	public int compareTo(Object obj)
+	public int compareTo(ICommand command)
 	{
-		return getName().compareTo(((ICommand)obj).getName());
+		return getCommandName().compareTo(command.getCommandName());
 	}
 
 	@Override
-	public String getName()
+	public String getCommandName()
 	{
 		return "friendlymobs";
 	}
@@ -50,14 +50,13 @@ public class CommandFriendlyMobs implements ICommand
 	}
 
 	@Override
-	public List getAliases()
+	public List getCommandAliases()
 	{
 		return Collections.emptyList();
 	}
 
-
 	@Override
-	public void execute(ICommandSender sender, final String[] args)
+	public void processCommand(ICommandSender sender, final String[] args)
 	{
 		if (args.length <= 0 || args[0].equalsIgnoreCase("version"))
 		{
@@ -120,7 +119,7 @@ public class CommandFriendlyMobs implements ICommand
 	}
 
 	@Override
-	public boolean canCommandSenderUse(ICommandSender sender)
+	public boolean canCommandSenderUseCommand(ICommandSender sender)
 	{
 		return sender instanceof MinecraftServer || sender instanceof EntityPlayerMP;
 	}

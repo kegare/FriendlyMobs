@@ -44,7 +44,7 @@ public class ArrayListExtended<E> extends ArrayList<E>
 		return this;
 	}
 
-	public ArrayListExtended<E> addAllObject(Iterable iterable)
+	public ArrayListExtended<E> addAllObject(Iterable<?> iterable)
 	{
 		for (Object obj : iterable)
 		{
