@@ -19,23 +19,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.RecursiveAction;
 
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.EntityList;
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.monster.EntityMob;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.config.GuiButtonExt;
-import net.minecraftforge.fml.client.config.GuiConfigEntries.ArrayEntry;
-import net.minecraftforge.fml.client.config.HoverChecker;
-import net.minecraftforge.fml.common.eventhandler.Event.Result;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
+import org.lwjgl.opengl.Display;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -49,6 +36,22 @@ import com.kegare.friendlymobs.api.event.GuiSelectedEvent.PostMobSelectedEvent;
 import com.kegare.friendlymobs.core.FriendlyMobs;
 import com.kegare.friendlymobs.util.ArrayListExtended;
 import com.kegare.friendlymobs.util.FriendlyUtils;
+
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.gui.GuiTextField;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.monster.EntityMob;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.config.GuiButtonExt;
+import net.minecraftforge.fml.client.config.GuiConfigEntries.ArrayEntry;
+import net.minecraftforge.fml.client.config.HoverChecker;
+import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @SideOnly(Side.CLIENT)
 public class GuiSelectMob extends GuiScreen
@@ -89,11 +92,16 @@ public class GuiSelectMob extends GuiScreen
 	@Override
 	public void initGui()
 	{
+		KeyBinding.unPressAllKeys();
+
+		Mouse.setGrabbed(false);
+		Mouse.setCursorPosition(Display.getWidth() / 2, Display.getHeight() / 2 + Display.getHeight() / 4);
+
 		Keyboard.enableRepeatEvents(true);
 
 		if (mobList == null)
 		{
-			mobList = new MobList(this);
+			mobList = new MobList();
 		}
 
 		mobList.setDimensions(width, height, 32, height - 28);
@@ -314,20 +322,20 @@ public class GuiSelectMob extends GuiScreen
 		}
 	}
 
-	protected static class MobList extends GuiListSlot<String>
+	protected class MobList extends GuiListSlot<String>
 	{
-		private final GuiSelectMob parent;
-		private final ArrayListExtended<String> mobs = new ArrayListExtended();
-		private final ArrayListExtended<String> contents = new ArrayListExtended();
-		private final ArrayListExtended<String> selected = new ArrayListExtended();
+		private final ArrayListExtended<String> mobs = new ArrayListExtended<>();
+		private final ArrayListExtended<String> contents = new ArrayListExtended<>();
+		private final ArrayListExtended<String> selected = new ArrayListExtended<>();
 		private final Map<String, List<String>> filterCache = Maps.newHashMap();
 
 		protected int nameType;
 
-		public MobList(GuiSelectMob parent)
+		private boolean clickFlag;
+
+		public MobList()
 		{
-			super(parent.mc, 0, 0, 0, 0, 18);
-			this.parent = parent;
+			super(GuiSelectMob.this.mc, 0, 0, 0, 0, 18);
 			this.initEntries();
 		}
 
@@ -359,13 +367,13 @@ public class GuiSelectMob extends GuiScreen
 
 					contents.addAll(mobs);
 
-					if (parent.presetMobs != null && !parent.presetMobs.isEmpty())
+					if (presetMobs != null && !presetMobs.isEmpty())
 					{
-						selected.addAll(parent.presetMobs);
+						selected.addAll(presetMobs);
 					}
-					else if (parent.configElement != null)
+					else if (configElement != null)
 					{
-						selected.addAllObject(parent.configElement.getCurrentValues());
+						selected.addAllObject(configElement.getCurrentValues());
 					}
 				}
 			});
@@ -424,7 +432,7 @@ public class GuiSelectMob extends GuiScreen
 		@Override
 		protected void drawBackground()
 		{
-			parent.drawDefaultBackground();
+			GuiSelectMob.this.drawDefaultBackground();
 		}
 
 		@Override
@@ -449,7 +457,7 @@ public class GuiSelectMob extends GuiScreen
 					break;
 			}
 
-			parent.drawCenteredString(parent.fontRendererObj, name, width / 2, par3 + 1, 0xFFFFFF);
+			GuiSelectMob.this.drawCenteredString(GuiSelectMob.this.fontRendererObj, name, width / 2, par3 + 1, 0xFFFFFF);
 		}
 
 		@Override
@@ -457,7 +465,7 @@ public class GuiSelectMob extends GuiScreen
 		{
 			String entry = contents.get(index, null);
 
-			if (entry != null && !entry.isEmpty() && !selected.remove(entry))
+			if (entry != null && !entry.isEmpty() && (clickFlag = !clickFlag == true) && !selected.remove(entry))
 			{
 				selected.addIfAbsent(entry);
 			}
