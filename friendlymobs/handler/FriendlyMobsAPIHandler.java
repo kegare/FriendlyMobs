@@ -23,7 +23,7 @@ public class FriendlyMobsAPIHandler implements IFriendlyMobsAPI
 			return false;
 		}
 
-		String name = String.valueOf(EntityList.classToStringMapping.get(entity.getClass()));
+		String name = String.valueOf(EntityList.CLASS_TO_NAME.get(entity.getClass()));
 
 		return name != null && !name.isEmpty() && ArrayUtils.contains(getFriendlyMobs(), name);
 	}
