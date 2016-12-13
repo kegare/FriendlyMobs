@@ -11,15 +11,15 @@ import net.minecraft.server.MinecraftServer;
 public class CommandFriendlyMobs extends CommandBase
 {
 	@Override
-	public String getCommandName()
+	public String getName()
 	{
 		return "friendlymobs";
 	}
 
 	@Override
-	public String getCommandUsage(ICommandSender sender)
+	public String getUsage(ICommandSender sender)
 	{
-		return "/" + getCommandName();
+		return "/" + getName();
 	}
 
 	@Override
@@ -33,7 +33,7 @@ public class CommandFriendlyMobs extends CommandBase
 	{
 		if (sender instanceof EntityPlayerMP)
 		{
-			FriendlyMobs.network.sendTo(new DisplayGuiMessage(GuiType.SELECT_MOB), (EntityPlayerMP)sender);
+			FriendlyMobs.NETWORK.sendTo(new DisplayGuiMessage(GuiType.SELECT_MOB), (EntityPlayerMP)sender);
 		}
 	}
 

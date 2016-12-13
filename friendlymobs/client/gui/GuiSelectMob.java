@@ -3,7 +3,6 @@ package friendlymobs.client.gui;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,8 +12,6 @@ import java.util.concurrent.RecursiveAction;
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
@@ -34,11 +31,14 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.config.GuiButtonExt;
 import net.minecraftforge.fml.client.config.GuiConfigEntries.ArrayEntry;
 import net.minecraftforge.fml.client.config.HoverChecker;
 import net.minecraftforge.fml.common.eventhandler.Event.Result;
+import net.minecraftforge.fml.common.registry.EntityEntry;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -333,16 +333,17 @@ public class GuiSelectMob extends GuiScreen
 					selected.clear();
 					filterCache.clear();
 
-					for (Iterator<Entry<String, Class<? extends Entity>>> iterator = EntityList.NAME_TO_CLASS.entrySet().iterator(); iterator.hasNext();)
+					for (Entry<ResourceLocation, EntityEntry> entry : ForgeRegistries.ENTITIES.getEntries())
 					{
-						Entry<String, Class<? extends Entity>> entry = iterator.next();
-						String name = entry.getKey();
-						Class<? extends Entity> clazz = entry.getValue();
+						EntityEntry entityEntry = entry.getValue();
+						Class<? extends Entity> entityClass = entityEntry.getEntityClass();
 
-						if (!Strings.isNullOrEmpty(name) && EntityMob.class != clazz && EntityLiving.class != clazz && EntityLiving.class.isAssignableFrom(clazz))
+						if (EntityMob.class == entityClass || EntityLiving.class == entityClass || !EntityLiving.class.isAssignableFrom(entityClass))
 						{
-							mobs.addIfAbsent(name);
+							continue;
 						}
+
+						mobs.addIfAbsent(entry.getKey().toString());
 					}
 
 					Collections.sort(mobs);
@@ -389,26 +390,12 @@ public class GuiSelectMob extends GuiScreen
 
 		protected List<String> getMobs()
 		{
-			return Lists.transform(contents, new Function<String, String>()
-			{
-				@Override
-				public String apply(String input)
-				{
-					return FriendlyUtils.getEntityLocalizedName(input);
-				}
-			});
+			return Lists.transform(contents, entry -> I18n.format("entity." + EntityList.getTranslationName(new ResourceLocation(entry)) + ".name"));
 		}
 
 		protected List<String> getSelectedMobs()
 		{
-			return Lists.transform(getSelected(), new Function<String, String>()
-			{
-				@Override
-				public String apply(String input)
-				{
-					return FriendlyUtils.getEntityLocalizedName(input);
-				}
-			});
+			return Lists.transform(getSelected(), entry -> I18n.format("entity." + EntityList.getTranslationName(new ResourceLocation(entry)) + ".name"));
 		}
 
 		@Override
@@ -422,7 +409,7 @@ public class GuiSelectMob extends GuiScreen
 		{
 			String entry = contents.get(index, null);
 
-			if (entry == null || entry.isEmpty())
+			if (Strings.isNullOrEmpty(entry))
 			{
 				return;
 			}
@@ -435,7 +422,7 @@ public class GuiSelectMob extends GuiScreen
 					name = entry;
 					break;
 				default:
-					name = FriendlyUtils.getEntityLocalizedName(entry);
+					name = I18n.format("entity." + EntityList.getTranslationName(new ResourceLocation(entry)) + ".name");
 					break;
 			}
 
@@ -463,45 +450,39 @@ public class GuiSelectMob extends GuiScreen
 
 		protected void setFilter(final String filter)
 		{
-			FriendlyUtils.getPool().execute(new RecursiveAction()
+			FriendlyUtils.getPool().execute(() ->
 			{
-				@Override
-				protected void compute()
+				List<String> result;
+
+				if (Strings.isNullOrEmpty(filter))
 				{
-					List<String> result;
-
-					if (Strings.isNullOrEmpty(filter))
+					result = mobs;
+				}
+				else if (filter.equals("selected"))
+				{
+					result = selected;
+				}
+				else
+				{
+					if (!filterCache.containsKey(filter))
 					{
-						result = mobs;
-					}
-					else if (filter.equals("selected"))
-					{
-						result = selected;
-					}
-					else
-					{
-						if (!filterCache.containsKey(filter))
-						{
-							filterCache.put(filter, Lists.newArrayList(Collections2.filter(mobs, new Predicate<String>()
-							{
-								@Override
-								public boolean apply(String input)
-								{
-									return StringUtils.containsIgnoreCase(input, filter) || StringUtils.containsIgnoreCase(FriendlyUtils.getEntityLocalizedName(input), filter);
-								}
-							})));
-						}
-
-						result = filterCache.get(filter);
+						filterCache.put(filter, Lists.newArrayList(Collections2.filter(mobs, input -> filterMatch(input, filter))));
 					}
 
-					if (!contents.equals(result))
-					{
-						contents.clear();
-						contents.addAll(result);
-					}
+					result = filterCache.get(filter);
+				}
+
+				if (!contents.equals(result))
+				{
+					contents.clear();
+					contents.addAll(result);
 				}
 			});
+		}
+
+		protected boolean filterMatch(String name, String filter)
+		{
+			return StringUtils.containsIgnoreCase(name, filter) || StringUtils.containsIgnoreCase(I18n.format("entity." + name + ".name"), filter);
 		}
 	}
 }

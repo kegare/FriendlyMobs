@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Level;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
+import friendlymobs.client.config.SelectMobEntry;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.common.config.Configuration;
@@ -19,6 +20,8 @@ import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 public class Config implements IMessage, IMessageHandler<Config, IMessage>
 {
@@ -29,6 +32,12 @@ public class Config implements IMessage, IMessageHandler<Config, IMessage>
 	public static Class<? extends IConfigEntry> selectMobEntry;
 
 	public static final String LANG_KEY = "friendlymobs.config.";
+
+	@SideOnly(Side.CLIENT)
+	public static void initializeConfigEntries()
+	{
+		selectMobEntry = SelectMobEntry.class;
+	}
 
 	public static void syncConfig()
 	{

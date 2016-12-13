@@ -1,12 +1,3 @@
-/*
- * FriendlyMobs
- *
- * Copyright (c) 2014 kegare
- * https://github.com/kegare
- *
- * This mod is distributed under the terms of the Minecraft Mod Public License Japanese Translation, or MMPL_J.
- */
-
 package friendlymobs.client.gui;
 
 import java.util.List;
@@ -42,7 +33,7 @@ public abstract class GuiListSlot<E> extends GuiSlot
 	@Override
 	protected void drawContainerBackground(Tessellator tessellator)
 	{
-		if (mc.theWorld != null)
+		if (mc.world != null)
 		{
 			Gui.drawRect(left, top, right, bottom, 0x101010);
 		}

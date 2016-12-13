@@ -2,10 +2,13 @@ package friendlymobs.handler;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import com.google.common.base.Strings;
+
 import friendlymobs.api.IFriendlyMobsAPI;
 import friendlymobs.core.Config;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
+import net.minecraft.util.ResourceLocation;
 
 public class FriendlyMobsAPIHandler implements IFriendlyMobsAPI
 {
@@ -23,8 +26,15 @@ public class FriendlyMobsAPIHandler implements IFriendlyMobsAPI
 			return false;
 		}
 
-		String name = String.valueOf(EntityList.CLASS_TO_NAME.get(entity.getClass()));
+		ResourceLocation entryName = EntityList.getKey(entity);
 
-		return name != null && !name.isEmpty() && ArrayUtils.contains(getFriendlyMobs(), name);
+		if (entryName == null)
+		{
+			return false;
+		}
+
+		String name = entryName.toString();
+
+		return !Strings.isNullOrEmpty(name) && ArrayUtils.contains(getFriendlyMobs(), name);
 	}
 }

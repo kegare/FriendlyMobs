@@ -65,7 +65,7 @@ public class FriendlyEventHooks
 				{
 					Config.friendlyMobs = event.mobs;
 
-					FriendlyMobs.network.sendToServer(new MobsSelectedMessage(event.mobs));
+					FriendlyMobs.NETWORK.sendToServer(new MobsSelectedMessage(event.mobs));
 				}
 			}
 		}
@@ -106,7 +106,7 @@ public class FriendlyEventHooks
 	@SubscribeEvent
 	public void onServerConnect(ServerConnectionFromClientEvent event)
 	{
-		event.getManager().sendPacket(FriendlyMobs.network.getPacketFrom(new Config()));
+		event.getManager().sendPacket(FriendlyMobs.NETWORK.getPacketFrom(new Config()));
 	}
 
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -114,7 +114,7 @@ public class FriendlyEventHooks
 	{
 		EntityLivingBase entity = event.getEntityLiving();
 
-		if (entity != null && !entity.worldObj.isRemote && FriendlyMobsAPI.isFriendly(entity))
+		if (entity != null && !entity.world.isRemote && FriendlyMobsAPI.isFriendly(entity))
 		{
 			if (entity.getAITarget() != null)
 			{
@@ -145,7 +145,7 @@ public class FriendlyEventHooks
 	{
 		Entity entity = event.getSource().getSourceOfDamage();
 
-		if (entity != null && !entity.worldObj.isRemote && FriendlyMobsAPI.isFriendly(entity))
+		if (entity != null && !entity.world.isRemote && FriendlyMobsAPI.isFriendly(entity))
 		{
 			event.setCanceled(true);
 		}
