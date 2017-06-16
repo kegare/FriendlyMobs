@@ -9,9 +9,9 @@ import friendlymobs.core.Config;
 import friendlymobs.core.FriendlyMobs;
 import friendlymobs.network.DisplayGuiMessage;
 import friendlymobs.network.MobsSelectedMessage;
+import friendlymobs.util.FriendlyUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.world.Explosion;
 import net.minecraftforge.common.config.Configuration;
@@ -21,7 +21,6 @@ import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.event.world.ExplosionEvent;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -116,26 +115,10 @@ public class FriendlyEventHooks
 
 		if (entity != null && !entity.world.isRemote && FriendlyMobsAPI.isFriendly(entity))
 		{
-			if (entity.getAITarget() != null)
+			if (FriendlyUtils.hasRevengeTarget(entity))
 			{
-				ObfuscationReflectionHelper.setPrivateValue(EntityLivingBase.class, entity, (EntityLivingBase)null, "entityLivingToAttack", "field_70755_b");
-				ObfuscationReflectionHelper.setPrivateValue(EntityLivingBase.class, entity, 0, "revengeTimer", "field_70756_c");
-			}
-
-			if (entity.getLastAttacker() != null)
-			{
-				ObfuscationReflectionHelper.setPrivateValue(EntityLivingBase.class, entity, (EntityLivingBase)null, "lastAttacker", "field_110150_bn");
-				ObfuscationReflectionHelper.setPrivateValue(EntityLivingBase.class, entity, 0, "lastAttackerTime", "field_142016_bo");
-			}
-
-			if (entity instanceof EntityLiving)
-			{
-				EntityLiving living = (EntityLiving)entity;
-
-				if (living.getAttackTarget() != null)
-				{
-					ObfuscationReflectionHelper.setPrivateValue(EntityLiving.class, living, (EntityLivingBase)null, "attackTarget", "field_70696_bz");
-				}
+				FriendlyUtils.resetRevengeTarget(entity);
+				FriendlyUtils.resetRevengeTimer(entity);
 			}
 		}
 	}
@@ -143,7 +126,14 @@ public class FriendlyEventHooks
 	@SubscribeEvent(priority = EventPriority.HIGHEST)
 	public void onLivingAttack(LivingAttackEvent event)
 	{
-		Entity entity = event.getSource().getSourceOfDamage();
+		Entity entity = event.getSource().getTrueSource();
+
+		if (entity != null && !entity.world.isRemote && FriendlyMobsAPI.isFriendly(entity))
+		{
+			event.setCanceled(true);
+		}
+
+		entity = event.getSource().getImmediateSource();
 
 		if (entity != null && !entity.world.isRemote && FriendlyMobsAPI.isFriendly(entity))
 		{

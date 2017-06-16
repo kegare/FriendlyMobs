@@ -95,20 +95,20 @@ public class GuiSelectMob extends GuiScreen
 			doneButton = new GuiButtonExt(0, 0, 0, 145, 20, I18n.format("gui.done"));
 		}
 
-		doneButton.xPosition = width / 2 + 10;
-		doneButton.yPosition = height - doneButton.height - 4;
+		doneButton.x = width / 2 + 10;
+		doneButton.y = height - doneButton.height - 4;
 
 		buttonList.clear();
 		buttonList.add(doneButton);
 
 		if (filterTextField == null)
 		{
-			filterTextField = new GuiTextField(1, fontRendererObj, 0, 0, 150, 16);
+			filterTextField = new GuiTextField(1, fontRenderer, 0, 0, 150, 16);
 			filterTextField.setMaxStringLength(100);
 		}
 
-		filterTextField.xPosition = width / 2 - filterTextField.width - 5;
-		filterTextField.yPosition = height - filterTextField.height - 6;
+		filterTextField.x = width / 2 - filterTextField.width - 5;
+		filterTextField.y = height - filterTextField.height - 6;
 
 		if (selectedHoverChecker == null)
 		{
@@ -172,7 +172,7 @@ public class GuiSelectMob extends GuiScreen
 
 		mobList.drawScreen(mouseX, mouseY, ticks);
 
-		drawCenteredString(fontRendererObj, I18n.format(Config.LANG_KEY + "select.mob"), width / 2, 15, 0xFFFFFF);
+		drawCenteredString(fontRenderer, I18n.format(Config.LANG_KEY + "select.mob"), width / 2, 15, 0xFFFFFF);
 
 		super.drawScreen(mouseX, mouseY, ticks);
 
@@ -184,7 +184,7 @@ public class GuiSelectMob extends GuiScreen
 
 			if (mouseX <= 100 && mouseY <= 20)
 			{
-				drawString(fontRendererObj, I18n.format(Config.LANG_KEY + "select.mob.selected", selected.size()), 5, 5, 0xEFEFEF);
+				drawString(fontRenderer, I18n.format(Config.LANG_KEY + "select.mob.selected", selected.size()), 5, 5, 0xEFEFEF);
 			}
 
 			if (selectedHoverChecker.checkHover(mouseX, mouseY))
@@ -405,7 +405,7 @@ public class GuiSelectMob extends GuiScreen
 		}
 
 		@Override
-		protected void drawSlot(int index, int par2, int par3, int par4, int mouseX, int mouseY)
+		protected void func_192637_a(int index, int par2, int par3, int par4, int mouseX, int mouseY, float ticks)
 		{
 			String entry = contents.get(index, null);
 
@@ -426,7 +426,7 @@ public class GuiSelectMob extends GuiScreen
 					break;
 			}
 
-			GuiSelectMob.this.drawCenteredString(GuiSelectMob.this.fontRendererObj, name, width / 2, par3 + 1, 0xFFFFFF);
+			GuiSelectMob.this.drawCenteredString(GuiSelectMob.this.fontRenderer, name, width / 2, par3 + 1, 0xFFFFFF);
 		}
 
 		@Override
