@@ -29,6 +29,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.monster.IMob;
+import net.minecraft.entity.passive.IAnimals;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.config.GuiButtonExt;
@@ -487,6 +489,30 @@ public class GuiSelectMob extends GuiScreen
 
 		protected boolean filterMatch(ResourceLocation key, String filter)
 		{
+			if ("monster".equalsIgnoreCase(filter))
+			{
+				Class<? extends Entity> entityClass = EntityList.getClass(key);
+
+				if (IMob.class.isAssignableFrom(entityClass))
+				{
+					return true;
+				}
+			}
+			else if ("animal".equalsIgnoreCase(filter))
+			{
+				Class<? extends Entity> entityClass = EntityList.getClass(key);
+
+				if (IMob.class.isAssignableFrom(entityClass))
+				{
+					return false;
+				}
+
+				if (IAnimals.class.isAssignableFrom(entityClass))
+				{
+					return true;
+				}
+			}
+
 			return StringUtils.containsIgnoreCase(key.toString(), filter) || StringUtils.containsIgnoreCase(I18n.format("entity." + EntityList.getTranslationName(key) + ".name"), filter);
 		}
 	}

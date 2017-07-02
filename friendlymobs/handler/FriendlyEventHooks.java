@@ -11,9 +11,9 @@ import friendlymobs.core.Config;
 import friendlymobs.core.FriendlyMobs;
 import friendlymobs.network.DisplayGuiMessage;
 import friendlymobs.network.MobsSelectedMessage;
-import friendlymobs.util.FriendlyUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.Explosion;
@@ -141,10 +141,14 @@ public class FriendlyEventHooks
 
 		if (entity != null && !entity.world.isRemote && FriendlyMobsAPI.isFriendly(entity))
 		{
-			if (FriendlyUtils.hasRevengeTarget(entity))
+			if (event.getTarget() != null)
 			{
-				FriendlyUtils.resetRevengeTarget(entity);
-				FriendlyUtils.resetRevengeTimer(entity);
+				entity.setRevengeTarget(null);
+
+				if (entity instanceof EntityLiving)
+				{
+					((EntityLiving)entity).setAttackTarget(null);
+				}
 			}
 		}
 	}
