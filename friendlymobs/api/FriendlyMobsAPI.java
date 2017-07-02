@@ -10,7 +10,7 @@ public final class FriendlyMobsAPI
 {
 	public static final String
 	MODID = "friendlymobs",
-	API_VERSION = "1.1.0";
+	API_VERSION = "1.1.4";
 
 	public static IFriendlyMobsAPI instance;
 

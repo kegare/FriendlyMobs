@@ -1,5 +1,6 @@
 package friendlymobs.api.event;
 
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.Event.HasResult;
@@ -17,9 +18,9 @@ public class GuiSelectedEvent extends Event
 	 */
 	public static class OnMobSelectedEvent extends GuiSelectedEvent
 	{
-		public String[] mobs;
+		public ResourceLocation[] mobs;
 
-		public OnMobSelectedEvent(String[] mobs)
+		public OnMobSelectedEvent(ResourceLocation[] mobs)
 		{
 			this.mobs = mobs;
 		}
@@ -32,7 +33,7 @@ public class GuiSelectedEvent extends Event
 	 */
 	public static class PostMobSelectedEvent extends OnMobSelectedEvent
 	{
-		public PostMobSelectedEvent(String[] mobs)
+		public PostMobSelectedEvent(ResourceLocation[] mobs)
 		{
 			super(mobs);
 		}

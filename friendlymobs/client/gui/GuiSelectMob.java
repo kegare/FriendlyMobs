@@ -3,11 +3,10 @@ package friendlymobs.client.gui;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.RecursiveAction;
 
 import org.apache.commons.lang3.StringUtils;
 import org.lwjgl.input.Keyboard;
@@ -16,7 +15,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 import friendlymobs.api.event.GuiSelectedEvent.OnMobSelectedEvent;
 import friendlymobs.api.event.GuiSelectedEvent.PostMobSelectedEvent;
@@ -53,7 +51,7 @@ public class GuiSelectMob extends GuiScreen
 	protected GuiTextField filterTextField;
 	protected HoverChecker selectedHoverChecker;
 
-	protected Collection<String> presetMobs;
+	protected Collection<ResourceLocation> presetMobs;
 
 	public GuiSelectMob(GuiScreen parent)
 	{
@@ -66,14 +64,14 @@ public class GuiSelectMob extends GuiScreen
 		this.configElement = entry;
 	}
 
-	public GuiSelectMob setPresetMobs(Collection<String> mobs)
+	public GuiSelectMob setPresetMobs(Collection<ResourceLocation> mobs)
 	{
 		presetMobs = mobs;
 
 		return this;
 	}
 
-	public Collection<String> getPresetMobs()
+	public Collection<ResourceLocation> getPresetMobs()
 	{
 		return presetMobs;
 	}
@@ -124,8 +122,8 @@ public class GuiSelectMob extends GuiScreen
 			switch (button.id)
 			{
 				case 0:
-					List<String> selected = mobList.getSelected();
-					OnMobSelectedEvent event = new OnMobSelectedEvent(selected.toArray(new String[selected.size()]));
+					List<ResourceLocation> selected = mobList.getSelected();
+					OnMobSelectedEvent event = new OnMobSelectedEvent(selected.toArray(new ResourceLocation[selected.size()]));
 					MinecraftForge.EVENT_BUS.post(event);
 
 					if (!event.getResult().equals(Result.DENY) && event.mobs != null)
@@ -134,7 +132,14 @@ public class GuiSelectMob extends GuiScreen
 
 						if (configElement != null)
 						{
-							configElement.setListFromChildScreen(event.mobs);
+							String[] entries = new String[event.mobs.length];
+
+							for (int i = 0; i < entries.length; ++i)
+							{
+								entries[i] = event.mobs[i].toString();
+							}
+
+							configElement.setListFromChildScreen(entries);
 						}
 					}
 
@@ -304,12 +309,12 @@ public class GuiSelectMob extends GuiScreen
 		Keyboard.enableRepeatEvents(false);
 	}
 
-	protected class MobList extends GuiListSlot<String>
+	protected class MobList extends GuiListSlot<ResourceLocation> implements Comparator<ResourceLocation>
 	{
-		protected final ArrayListExtended<String> mobs = new ArrayListExtended<>();
-		protected final ArrayListExtended<String> contents = new ArrayListExtended<>();
-		protected final ArrayListExtended<String> selected = new ArrayListExtended<>();
-		protected final Map<String, List<String>> filterCache = Maps.newHashMap();
+		protected final ArrayListExtended<ResourceLocation> mobs = new ArrayListExtended<>();
+		protected final ArrayListExtended<ResourceLocation> contents = new ArrayListExtended<>();
+		protected final ArrayListExtended<ResourceLocation> selected = new ArrayListExtended<>();
+		protected final Map<String, List<ResourceLocation>> filterCache = Maps.newHashMap();
 
 		protected int nameType;
 
@@ -323,79 +328,71 @@ public class GuiSelectMob extends GuiScreen
 
 		protected void initEntries()
 		{
-			FriendlyUtils.getPool().execute(new RecursiveAction()
+			mobs.clear();
+			contents.clear();
+			selected.clear();
+			filterCache.clear();
+
+			for (Entry<ResourceLocation, EntityEntry> entry : ForgeRegistries.ENTITIES.getEntries())
 			{
-				@Override
-				protected void compute()
+				EntityEntry entityEntry = entry.getValue();
+				Class<? extends Entity> entityClass = entityEntry.getEntityClass();
+
+				if (EntityMob.class == entityClass || EntityLiving.class == entityClass || !EntityLiving.class.isAssignableFrom(entityClass))
 				{
-					mobs.clear();
-					contents.clear();
-					selected.clear();
-					filterCache.clear();
-
-					for (Entry<ResourceLocation, EntityEntry> entry : ForgeRegistries.ENTITIES.getEntries())
-					{
-						EntityEntry entityEntry = entry.getValue();
-						Class<? extends Entity> entityClass = entityEntry.getEntityClass();
-
-						if (EntityMob.class == entityClass || EntityLiving.class == entityClass || !EntityLiving.class.isAssignableFrom(entityClass))
-						{
-							continue;
-						}
-
-						mobs.addIfAbsent(entry.getKey().toString());
-					}
-
-					Collections.sort(mobs);
-
-					contents.addAll(mobs);
-
-					if (presetMobs != null && !presetMobs.isEmpty())
-					{
-						selected.addAll(presetMobs);
-					}
-					else if (configElement != null)
-					{
-						selected.addAllObject(configElement.getCurrentValues());
-					}
+					continue;
 				}
-			});
+
+				mobs.addIfAbsent(entry.getKey());
+			}
+
+			Collections.sort(mobs, this);
+
+			contents.addAll(mobs);
+
+			if (presetMobs != null && !presetMobs.isEmpty())
+			{
+				for (ResourceLocation key : presetMobs)
+				{
+					selected.addIfAbsent(key);
+				}
+			}
+			else if (configElement != null)
+			{
+				for (Object obj : configElement.getCurrentValues())
+				{
+					ResourceLocation key = new ResourceLocation(obj.toString());
+
+					selected.addIfAbsent(key);
+				}
+			}
+
+			if (!selected.isEmpty())
+			{
+				Collections.sort(selected, this);
+			}
 		}
 
 		@Override
-		protected List<String> getContents()
+		protected List<ResourceLocation> getContents()
 		{
 			return contents;
 		}
 
 		@Override
-		protected List<String> getSelected()
+		protected List<ResourceLocation> getSelected()
 		{
-			Set<String> set = Sets.newHashSet(selected);
-
-			selected.clear();
-
-			for (String name : set)
-			{
-				if (!Strings.isNullOrEmpty(name))
-				{
-					selected.add(name);
-				}
-			}
-
-			Collections.sort(selected);
-
 			return selected;
 		}
 
 		protected List<String> getMobs()
 		{
-			return Lists.transform(contents, entry -> I18n.format("entity." + EntityList.getTranslationName(new ResourceLocation(entry)) + ".name"));
+			return Lists.transform(contents, entry -> I18n.format("entity." + EntityList.getTranslationName(entry) + ".name"));
 		}
 
 		protected List<String> getSelectedMobs()
 		{
-			return Lists.transform(getSelected(), entry -> I18n.format("entity." + EntityList.getTranslationName(new ResourceLocation(entry)) + ".name"));
+			return Lists.transform(getSelected(), entry -> I18n.format("entity." + EntityList.getTranslationName(entry) + ".name"));
 		}
 
 		@Override
@@ -405,11 +402,11 @@ public class GuiSelectMob extends GuiScreen
 		}
 
 		@Override
-		protected void func_192637_a(int index, int par2, int par3, int par4, int mouseX, int mouseY, float ticks)
+		protected void drawSlot(int index, int insideLeft, int par3, int par4, int mouseX, int mouseY, float ticks)
 		{
-			String entry = contents.get(index, null);
+			ResourceLocation key = contents.get(index, null);
 
-			if (Strings.isNullOrEmpty(entry))
+			if (key == null)
 			{
 				return;
 			}
@@ -419,10 +416,10 @@ public class GuiSelectMob extends GuiScreen
 			switch (nameType)
 			{
 				case 1:
-					name = entry;
+					name = key.toString();
 					break;
 				default:
-					name = I18n.format("entity." + EntityList.getTranslationName(new ResourceLocation(entry)) + ".name");
+					name = I18n.format("entity." + EntityList.getTranslationName(key) + ".name");
 					break;
 			}
 
@@ -432,27 +429,35 @@ public class GuiSelectMob extends GuiScreen
 		@Override
 		protected void elementClicked(int index, boolean flag, int mouseX, int mouseY)
 		{
-			String entry = contents.get(index, null);
+			ResourceLocation key = contents.get(index, null);
 
-			if (entry != null && !entry.isEmpty() && (clickFlag = !clickFlag == true) && !selected.remove(entry))
+			if (key != null && (clickFlag = !clickFlag == true) && !selected.remove(key))
 			{
-				selected.addIfAbsent(entry);
+				selected.addIfAbsent(key);
+
+				Collections.sort(selected, this);
 			}
 		}
 
 		@Override
 		protected boolean isSelected(int index)
 		{
-			String entry = contents.get(index, null);
+			ResourceLocation key = contents.get(index, null);
 
-			return entry != null && !entry.isEmpty() && selected.contains(entry);
+			return key != null && selected.contains(key);
+		}
+
+		@Override
+		public int compare(ResourceLocation o1, ResourceLocation o2)
+		{
+			return StringUtils.compare(o1.toString(), o2.toString());
 		}
 
 		protected void setFilter(final String filter)
 		{
 			FriendlyUtils.getPool().execute(() ->
 			{
-				List<String> result;
+				List<ResourceLocation> result;
 
 				if (Strings.isNullOrEmpty(filter))
 				{
@@ -480,9 +485,9 @@ public class GuiSelectMob extends GuiScreen
 			});
 		}
 
-		protected boolean filterMatch(String name, String filter)
+		protected boolean filterMatch(ResourceLocation key, String filter)
 		{
-			return StringUtils.containsIgnoreCase(name, filter) || StringUtils.containsIgnoreCase(I18n.format("entity." + name + ".name"), filter);
+			return StringUtils.containsIgnoreCase(key.toString(), filter) || StringUtils.containsIgnoreCase(I18n.format("entity." + EntityList.getTranslationName(key) + ".name"), filter);
 		}
 	}
 }

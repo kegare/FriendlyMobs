@@ -9,12 +9,12 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 
 import friendlymobs.client.config.SelectMobEntry;
+import friendlymobs.util.FriendlyLog;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.client.config.GuiConfigEntries.IConfigEntry;
-import net.minecraftforge.fml.common.FMLLog;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
@@ -61,7 +61,7 @@ public class Config implements IMessage, IMessageHandler<Config, IMessage>
 
 				file.renameTo(dest);
 
-				FMLLog.log(Level.ERROR, e, "A critical error occured reading the " + file.getName() + " file, defaults will be used - the invalid file is backed up at " + dest.getName());
+				FriendlyLog.log(Level.ERROR, e, "A critical error occured reading the " + file.getName() + " file, defaults will be used - the invalid file is backed up at " + dest.getName());
 			}
 		}
 

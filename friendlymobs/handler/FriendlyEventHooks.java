@@ -1,5 +1,7 @@
 package friendlymobs.handler;
 
+import java.util.Set;
+
 import com.google.common.collect.Sets;
 
 import friendlymobs.api.FriendlyMobsAPI;
@@ -13,6 +15,7 @@ import friendlymobs.util.FriendlyUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.Explosion;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.event.entity.living.EnderTeleportEvent;
@@ -27,6 +30,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent.ClientDisconnectionFromServerEvent;
 import net.minecraftforge.fml.common.network.FMLNetworkEvent.ServerConnectionFromClientEvent;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 
@@ -54,17 +58,25 @@ public class FriendlyEventHooks
 
 			if (gui.getPresetMobs() != null)
 			{
+				ResourceLocation[] mobs = event.mobs;
+				String[] entries = new String[mobs.length];
+
+				for (int i = 0; i < entries.length; ++i)
+				{
+					entries[i] = mobs[i].toString();
+				}
+
 				if (mc.isSingleplayer())
 				{
-					Config.config.getCategory(Configuration.CATEGORY_GENERAL).get("friendlyMobs").set(event.mobs);
+					Config.config.getCategory(Configuration.CATEGORY_GENERAL).get("friendlyMobs").set(entries);
 
 					Config.syncConfig();
 				}
 				else
 				{
-					Config.friendlyMobs = event.mobs;
+					Config.friendlyMobs = entries;
 
-					FriendlyMobs.NETWORK.sendToServer(new MobsSelectedMessage(event.mobs));
+					FriendlyMobs.NETWORK.sendToServer(new MobsSelectedMessage(entries));
 				}
 			}
 		}
@@ -86,7 +98,21 @@ public class FriendlyEventHooks
 			switch (DisplayGuiMessage.guiType)
 			{
 				case SELECT_MOB:
-					mc.displayGuiScreen(new GuiSelectMob(mc.currentScreen).setPresetMobs(Sets.newHashSet(FriendlyMobsAPI.getFriendlyMobs())));
+					Set<ResourceLocation> keys = Sets.newHashSet();
+					String[] mobs = FriendlyMobsAPI.getFriendlyMobs();
+
+					for (String str : mobs)
+					{
+						ResourceLocation key = new ResourceLocation(str);
+
+						if (ForgeRegistries.ENTITIES.containsKey(key))
+						{
+							keys.add(key);
+						}
+					}
+
+					mc.displayGuiScreen(new GuiSelectMob(mc.currentScreen).setPresetMobs(keys));
+
 					break;
 				default:
 			}
