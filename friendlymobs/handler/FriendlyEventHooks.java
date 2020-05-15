@@ -143,12 +143,12 @@ public class FriendlyEventHooks
 		{
 			if (event.getTarget() != null)
 			{
-				entity.setRevengeTarget(null);
-
 				if (entity instanceof EntityLiving)
 				{
 					((EntityLiving)entity).setAttackTarget(null);
 				}
+
+				entity.getCombatTracker().reset();
 			}
 		}
 	}

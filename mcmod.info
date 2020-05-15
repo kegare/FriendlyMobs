@@ -1,23 +1,11 @@
-{
-  "modListVersion": 2,
-  "modList": [
-    {
-      "modid": "friendlymobs",
-      "name": "FriendlyMobs",
-      "description": "Mobs can become everyone friendly.",
-      "url": "https://kegare.github.io",
-      "updateJSON": "",
-      "logoFile": "logo.png",
-      "version": "1.1.5",
-      "credits": "Authored by kegare",
-      "parent": "",
-      "authorList": [
-        "kegare"
-      ],
-      "requiredMods": [],
-      "dependencies": [],
-      "dependants": [],
-      "useDependencyInformation": "true"
-    }
-  ]
-}
+[{
+  "modid": "friendlymobs",
+  "name": "FriendlyMobs",
+  "description": "Mobs can become everyone friendly.",
+  "version": "1.1.6",
+  "logoFile": "logo.png",
+  "url": "https://www.curseforge.com/minecraft/mc-mods/friendlymobs",
+  "authorList": ["kegare"],
+  "credits": "Produced by kegare",
+  "useDependencyInformation": true
+}]
